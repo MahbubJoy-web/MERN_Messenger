@@ -1,0 +1,4 @@
+const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[A-Za-z]{2,}$/;
+const passwordRegex = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
+
+module.exports ={ emailRegex, passwordRegex}
