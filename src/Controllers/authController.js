@@ -6,6 +6,7 @@ const bcrypt = require('bcrypt');
 const saltRounds = 10;
 const nodemailer = require("nodemailer");
 const { otpVerificationTemplate } = require("../helpers/otpTemplate");
+const e = require("express");
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
   port: 465,
@@ -48,14 +49,28 @@ const registration = async (req,res)=>{
         avater ,
         otp,
         expireOtpTime : getTimeAfter3Minutes()
-    }).save()
+    })
+    
+    saveModel.save()
     .then(() => {
+
+      const UserInfo = {
+        'userId' : saveModel.id,
+        'firstName' : saveModel.firstName,
+        'lastName' : saveModel.lastName,
+        'email' : saveModel.email,
+        'avater' : saveModel.avater,
+        'phone' : saveModel.phone,
+        'gender' : saveModel.gender
+      }
+
+      res.status(201).send({UserInfo : UserInfo})
       sendOTPEmail(email, otpVerificationTemplate(lastName, otp))
     });
-
-    res.send('user Register')
     
 }
+// ================otp verify by button ============== //
+
 
 // ===============OTP Verification Controller================ //
 
@@ -77,6 +92,63 @@ const OtpVerification = async (req, res) =>{
 
   res.send('OTP Verified')
 
+  dbOtp.save()
+
 }
 
-module.exports = {registration , OtpVerification} 
+// ===========Resend OTP Controller =========== //
+const resnedOtp = async (req, res) =>{
+    const {email} = req.body
+
+    if(!email) return res.status(401).send('Email is required')
+
+    const existUser = await authSchema.findOne({email})
+    
+    if(!existUser) return res.status(401).send('User not found')
+    
+    const otp = generateOTPNumber()
+
+    existUser.otp = otp
+    existUser.expireOtpTime = getTimeAfter3Minutes()
+    existUser.isVerified = false
+    existUser.save()
+    .then(()=>{
+      sendOTPEmail(email, otpVerificationTemplate(existUser.lastName, otp))
+    })
+
+    res.send('OTP Resend')
+
+}
+
+// ==================Login Controller =============== //
+const Login = async (req, res)=>{
+  const { email , password} = req.body
+
+  if(!email || !password) return res.status(401).send('Email and Password are required')
+
+  const dbUser = await authSchema.findOne({email})
+
+  if(!dbUser) return res.status(401).send('User Not Found')
+  
+  if(dbUser.isVerified == false) return res.status(401).send('Please Verify the your Email')
+  
+  const bcryptpass = await bcrypt.compare(password , dbUser.password)
+
+  if(!bcryptpass) return res.status(401).send('Wrong Password') 
+  
+  const UserInfo = {
+    'userId' : dbUser.id,
+    'firstName' : dbUser.firstName,
+    'lastName' : dbUser.lastName,
+    'email' : dbUser.email,
+    'avater' : dbUser.avater,
+    'phone' : dbUser.phone,
+    'gender' : dbUser.gender
+  }
+
+      res.status(201).send({UserInfo : UserInfo})
+}
+
+module.exports = {registration , OtpVerification , resnedOtp , Login} 
+
+// ====================== video -> 42:20 =========== //

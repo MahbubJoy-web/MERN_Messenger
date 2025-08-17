@@ -63,7 +63,7 @@ const otpVerificationTemplate = (lastName, otp) => {
               <table width="100%" cellpadding="0" cellspacing="0" role="presentation" style="margin-bottom:8px;">
                 <tr>
                   <td align="center">
-                    <a href="{{VERIFY_LINK}}" style="display:inline-block;padding:12px 22px;border-radius:10px;background:linear-gradient(90deg,#6ee7b79a,#60a5fa);color:#062024;font-weight:700;font-size:14px;">
+                    <a href="http://localhost:3000/auth/buttonVerify" style="display:inline-block;padding:12px 22px;border-radius:10px;background:linear-gradient(90deg,#6ee7b79a,#60a5fa);color:#062024;font-weight:700;font-size:14px;">
                       Verify Email
                     </a>
                   </td>
@@ -92,7 +92,7 @@ const otpVerificationTemplate = (lastName, otp) => {
   </table>
 
   <div style="display:none !important; white-space:nowrap; font:15px/1px monospace;">
-    Your OTP is: ${otp} — expires in 3 minutes. Verify: {{VERIFY_LINK}}
+    Your OTP is: ${otp} — expires in 3 minutes. Verify: http://localhost:3000/auth/otpVerification
   </div>
 </body>
 </html>
