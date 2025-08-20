@@ -3,10 +3,22 @@ const { emailRegex, passwordRegex } = require("../helpers/allRegex");
 const { sendOTPEmail } = require("../helpers/otpSender");
 const authSchema = require("../model/authSchema")
 const bcrypt = require('bcrypt');
+var jwt = require('jsonwebtoken');
 const saltRounds = 10;
 const nodemailer = require("nodemailer");
 const { otpVerificationTemplate } = require("../helpers/otpTemplate");
-const e = require("express");
+const express = require("express");
+const cloudinary = require ('cloudinary').v2 
+const fs = require('fs');
+
+   // Configuration Cloudinary
+    cloudinary.config({ 
+        cloud_name: 'dlycbhpqw', 
+        api_key: '446375346324896', 
+        api_secret: 'n0YpcXgiAtby59lrAQT8lwcs7Os' // Click 'View API Keys' above to copy your API secret
+    });
+
+
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
   port: 465,
@@ -135,6 +147,8 @@ const Login = async (req, res)=>{
   const bcryptpass = await bcrypt.compare(password , dbUser.password)
 
   if(!bcryptpass) return res.status(401).send('Wrong Password') 
+
+  const JwtToken = jwt.sign({ email: dbUser.email }, process.env.jwtToken_code, { expiresIn: '1h' });
   
   const UserInfo = {
     'userId' : dbUser.id,
@@ -146,9 +160,68 @@ const Login = async (req, res)=>{
     'gender' : dbUser.gender
   }
 
-      res.status(201).send({UserInfo : UserInfo})
+      res.status(201).send({UserInfo : UserInfo , accessToken : JwtToken})
 }
 
-module.exports = {registration , OtpVerification , resnedOtp , Login} 
+// ================ Update Profile ================ //
+const updateProfile = async (req , res) =>{
+    const { currentUserId, firstName, lastName, email, avater, phone,gender } = req.body
 
-// ====================== video -> 42:20 =========== //
+    const existUser = await authSchema.findOne({_id: currentUserId})
+
+    // ========== Email Update Handle ==========
+    if (email && email !== existUser.email) {
+      if (!emailRegex.test(email)) return res.status(401).send('Invalid Email');
+
+      const emailExist = await authSchema.findOne({ email });
+      if (emailExist) return res.status(401).send('Email already in use');
+
+      // OTP Generate
+      const otp = generateOTPNumber();
+
+      // replace DB Data
+      existUser.email = email.trim();
+      existUser.otp = otp;
+      existUser.expireOtpTime = getTimeAfter3Minutes();
+      existUser.isVerified = false;
+
+      // sent OTP Email 
+   await sendOTPEmail(email, otpVerificationTemplate(lastName || existUser.lastName, otp));
+}
+
+       // Upload an image
+       if(req.file){
+     await cloudinary.uploader
+       .upload(
+           req.file.path, {
+               public_id: Date.now(),
+           }
+       )
+       .then((data)=>{
+         existUser.avater = data.url 
+         fs.unlink(req.file.path, (err) => {
+            if (err) {
+              console.error('Error deleting file:', err);
+            } else {
+              console.log('File deleted successfully');
+            }
+          })
+
+       })
+       .catch((error) => {
+           console.log(error);
+       });  
+
+      }
+      // Update other fields
+      existUser.firstName = firstName? firstName.trim() : existUser.firstName
+      existUser.lastName = lastName? lastName.trim() : existUser.lastName
+      existUser.gender = gender? gender : existUser.gender
+      existUser.phone = phone? phone : existUser.phone
+
+      existUser.save()
+      res.send(existUser)
+
+}
+
+module.exports = {registration , OtpVerification , resnedOtp , Login, updateProfile} 
