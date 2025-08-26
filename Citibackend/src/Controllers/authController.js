@@ -35,7 +35,7 @@ const registration = async (req,res)=>{
     const {firstName, lastName, email, gender, phone, password} = req.body
 
     if(!firstName || !lastName || !email || !gender || !phone || !password) return res.status(401).send('fill the all input')
-    if(!emailRegex.test(email)) return res.status(401).send('invaild Email')
+    if(!emailRegex.test(email)) return res.status(401).send('Invaild Email')
     if(!passwordRegex.test(password)) return res.status(401).send('Password must be at least 8 characters and include at least one uppercase letter and one number')
 
      const existUser = await authSchema.findOne({email})
@@ -169,7 +169,7 @@ const updateProfile = async (req , res) =>{
 
     const existUser = await authSchema.findOne({_id: currentUserId})
 
-    // ========== Email Update Handle ==========
+    //  Email Update Handle 
     if (email && email !== existUser.email) {
       if (!emailRegex.test(email)) return res.status(401).send('Invalid Email');
 
