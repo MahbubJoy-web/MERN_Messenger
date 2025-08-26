@@ -2,11 +2,16 @@ import axios from "axios";
 import React, { useState } from "react";
 import { FaEnvelope } from "react-icons/fa";
 import { TbLockPassword } from "react-icons/tb";
-import { Link } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { Link, useNavigate } from "react-router-dom";
 import { Bounce, toast } from "react-toastify";
+import { UserInfo } from "../Slice/UserSlice";
+import Cookies from "js-cookie";
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: "", password: "" });
+  const dispatch = useDispatch()
+  const navigate = useNavigate()
 
   // input change handle
   const handleInputChange = (e) => {
@@ -41,6 +46,11 @@ const Login = () => {
             theme: "light",
             transition: Bounce,
           });
+          navigate('/')
+          dispatch(UserInfo(res.data.UserInfo))
+          localStorage.setItem('userInfo' , JSON.stringify(res.data.UserInfo))
+          Cookies.set('token' , res.data.accessToken)
+          
         })
         .catch((err) => {
             toast.error( (err.response.data), {
