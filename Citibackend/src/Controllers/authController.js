@@ -168,6 +168,8 @@ const updateProfile = async (req , res) =>{
     const { currentUserId, firstName, lastName, email, avater, phone,gender } = req.body
 
     const existUser = await authSchema.findOne({_id: currentUserId})
+    console.log(currentUserId);
+    
 
     //  Email Update Handle 
     if (email && email !== existUser.email) {
@@ -220,7 +222,7 @@ const updateProfile = async (req , res) =>{
       existUser.phone = phone? phone : existUser.phone
 
       existUser.save()
-      res.send(existUser)
+      res.send('mahbub')
 
 }
 

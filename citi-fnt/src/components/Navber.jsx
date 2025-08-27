@@ -1,8 +1,10 @@
 import React from "react";
 import { FaComments, FaUsers, FaBan, FaUserCircle } from "react-icons/fa";
+import { useSelector } from "react-redux";
 import { NavLink } from "react-router-dom";
 
 const Navber = () => {
+    const userInfo = useSelector(state=>state.mySlice.value)
   return (
     <div className="w-20 h-screen bg-gray-100 border border-l border-gray-300 flex flex-col justify-between items-center py-6 shadow-lg">
       {/* Top Section */}
@@ -65,7 +67,9 @@ const Navber = () => {
             }`
           }
         >
-          <FaUserCircle className="text-3xl mb-1" />
+          <div className="w-[50px] h-[50px] border border-gray-500 bg-gray-300 rounded-full overflow-hidden mb-1">
+            <img src={userInfo?.avater} alt="" />
+          </div>
           Profile
         </NavLink>
       </div>
