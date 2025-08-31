@@ -8,7 +8,6 @@ const tokenVerification = (req,res, next) =>{
        if(err) return res.status(401).send('Invalid Token');
         
   });
-
      next()
     
 }

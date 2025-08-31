@@ -148,7 +148,7 @@ const Login = async (req, res)=>{
 
   if(!bcryptpass) return res.status(401).send('Wrong Password') 
 
-  const JwtToken = jwt.sign({ email: dbUser.email }, process.env.jwtToken_code, { expiresIn: '1h' });
+  const JwtToken = jwt.sign({ email: dbUser.email }, process.env.jwtToken_code, { expiresIn: '2h' });
   
   const UserInfo = {
     'userId' : dbUser.id,
