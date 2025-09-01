@@ -3,12 +3,12 @@ const mongoose = require('mongoose')
 const contactList = new mongoose.Schema({
     adderId:{
         type: mongoose.Schema.ObjectId,
-        ref : 'authallUser',
+        ref : 'allUser',
         required : true
     },
     addingUserId:{
         type: mongoose.Schema.ObjectId,
-        ref : 'authallUser',
+        ref : 'allUser',
         required : true
     },
     LastMsg:{

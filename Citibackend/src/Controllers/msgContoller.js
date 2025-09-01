@@ -31,17 +31,45 @@ catch(err){
     return res.send(err)
 }  
 }
-// =================contact List================== //
+// =================add to contact List================== //
 
 const addToContact = async (req , res)=>{
-    const {adderId , addingUserId} = req.body
-
-    if(!adderId) return res.status(404).send('Please Add Anybody to Contact')
-    if(!addingUserId) return res.status(404).send('Please Adding Anybody to Contact')
-
+    try{
+        const {adderId , addingUserId} = req.body
+    
+        if(!adderId) return res.status(404).send('Please Add Anybody to Contact')
+        if(!addingUserId) return res.status(404).send('Please Adding Anybody to Contact')
+        
+        const existContact = await contactList.findOne({ 
+            adderId: adderId, 
+            addingUserId: addingUserId 
+        });
+        const secendexistContact = await contactList.findOne({ 
+            adderId: addingUserId, 
+            addingUserId: adderId 
+        });
+    
+        if(existContact || secendexistContact){
+            return res.status(400).send('user is already in your contact list')
+        }
         await new contactList({adderId , addingUserId}).save()
-
-    res.status(200).send('User Added to Contact')
+    
+        res.status(200).send('User Added to Contact')
+    }
+    catch(err){
+        res.status(500).send('Something Went wrong')
+    }
 }
 
-module.exports = {allUser , addToContact}
+// ============= get Contact list Api ============== //
+const usercontactList = async (req, res)=>{
+    const currentUserId = req.params.userID
+
+    
+    const allUserList = await contactList.find({$or: [{adderId : currentUserId} , {addingUserId : currentUserId}]}).populate('adderId' , 'firstName lastName email avater').populate('adderId' , 'firstName lastName email avater')
+    
+    res.send(allUserList)
+
+}
+
+module.exports = {allUser , addToContact ,usercontactList}

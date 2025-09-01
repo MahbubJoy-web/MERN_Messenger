@@ -1,8 +1,9 @@
 const express = require('express')
-const { allUser, addToContact } = require('../../Controllers/msgContoller')
+const { allUser, addToContact,  usercontactList } = require('../../Controllers/msgContoller')
 const msgrouter = express.Router()
 
 msgrouter.get('/allUser/:userID', allUser)
-msgrouter.post('/contactlist', addToContact)
+msgrouter.post('/addtocontact', addToContact)
+msgrouter.get('/contactlist/:userID', usercontactList)
 
 module.exports = msgrouter
